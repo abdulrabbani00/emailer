@@ -22,8 +22,8 @@ COPY --chown=abdulrab docker/bashrc /home/abdulrab/.bashrc
 RUN git clone --depth=1 https://github.com/amix/vimrc.git ~/.vim_runtime
 RUN sh ~/.vim_runtime/install_awesome_vimrc.sh
 
-#RUN pip3 install --upgrade pip && \
-#    pip3 install --no-cache-dir pandas
+RUN pip3 install --upgrade pip && \
+    pip3 install --no-cache-dir pandas
 
 ########################
 #   Clone Application  #
