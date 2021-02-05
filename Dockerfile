@@ -15,7 +15,7 @@ RUN mkdir /home/abdulrab/.ssh/ && chmod 700 /home/abdulrab/.ssh/
 
 COPY --chown=abdulrab docker/config /home/abdulrab/.ssh/config
 COPY --chown=abdulrab docker/id_rsa.pub /home/abdulrab/.ssh/authorized_keys
-COPY --chown=abdulrab docker/id_rsa /home/abdulrab/.ssh/id_rsa
+COPY --chown=abdulrab id_rsa /home/abdulrab/.ssh/id_rsa
 
 COPY --chown=abdulrab docker/bashrc /home/abdulrab/.bashrc
 
