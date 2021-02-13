@@ -31,8 +31,7 @@ resource "aws_instance" "emailer_instance" {
   #aiam = "ec2-read-role"
   iam_instance_profile = aws_iam_instance_profile.iam_read_profile.name
   availability_zone = "us-east-1a"
-  key_name = "abdul-emailer"
-	user_data = file("setup_server.sh")
+  key_name = "admin_emailer_rsa"
   vpc_security_group_ids = ["sg-00a0a79dd235057f6"]
   tags = {
     Name = "emailer-instance-test-1"

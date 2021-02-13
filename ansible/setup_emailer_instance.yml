@@ -1,5 +1,5 @@
 ---
-# ansible-playbook -i ec2-18-204-245-74.compute-1.amazonaws.com, setup_emailer_instance.yml
+# ansible-playbook -i ec2-44-192-111-122.compute-1.amazonaws.com, setup_emailer_instance.yml
 # ansible-playbook -i hostname, setup_emailer_instance.yml
 
 - name: Set up emailer instance
@@ -7,14 +7,31 @@
 
   tasks:
 
+
+  - name: Add the user 'abdulrab' with a specific uid and a primary group of 'admin'
+    user:
+      name: abdulrab
+      uid: 1040
+      groups: admin, sudo
+      shell: /bin/bash
+    become: yes
+    tags:
+      - setup_user
+
   - name: Install critical packages
     apt:
-      name: ['xfsprogs', 'parted']
+      name: ['xfsprogs', 'parted', 'git', 'python3-pip']
       state: present
     become: true
+    tags:
+      - setup_user
 
   - name: "get facts"
     ec2_metadata_facts: {}
+
+#################################
+# Mount EBS volume #
+#################################
 
   - name: determine the supervisor
     set_fact:
@@ -35,3 +52,83 @@
     args:
       apply:
         become: yes
+
+
+#################################
+#  Set up User #
+#################################
+
+  - name: Debug dict
+    debug:
+      msg: "{{item['src']}}"
+    with_items:
+      - {"src": "/some/source", "dest": "some_dest", "perm": "some_perm"}
+    tags:
+      - test
+
+  - name: Create .ssh and emailer folder
+    file:
+      path: "/home/abdulrab/{{item}}"
+      state: directory
+      mode: 0755
+      owner: abdulrab
+      group: abdulrab
+    with_items:
+      - .ssh
+      - emailer
+    become: yes
+    tags:
+      - setup_user
+
+  - name: Copy Needed files
+    copy:
+      src: "{{item.src}}"
+      dest: "{{item.dest}}"
+      owner: abdulrab
+      group: abdulrab
+      mode: "{{item.mode}}"
+    become: yes
+    with_items:
+      - {"src": "files/bashrc", "dest": "/home/abdulrab/.bashrc","mode": "644"}
+      - {"src": "files/config", "dest": "/home/abdulrab/.ssh/config","mode": "644"}
+      - {"src": "files/abdul_emailer_rsa.pub", "dest": "/home/abdulrab/.ssh/id_rsa.pub","mode": "400"}
+      - {"src": "files/abdul_emailer_rsa.pub", "dest": "/home/abdulrab/.ssh/authorized_keys","mode": "400"}
+      - {"src": "files/abdul_emailer_rsa", "dest": "/home/abdulrab/.ssh/id_rsa","mode": "400"}
+      - {"src": "files/deploy_emailer.sh", "dest": "/home/abdulrab/deploy_emailer.sh","mode": "766"}
+    tags:
+      - setup_user
+
+  - name: Copy over .vimrc
+    git:
+      repo: "https://github.com/amix/vimrc.git"
+      dest: "{{item}}"
+      clone: yes
+      depth: 1
+    become: true
+    tags:
+      - setup_user
+      - vimrc
+    with_items:
+      - /opt/vim_runtime
+      - ~/.vim_runtime
+
+
+  - name: Run the vimrc scrip
+    shell: sh ~/.vim_runtime/install_awesome_parameterized.sh /opt/vim_runtime --all
+    become: true
+    tags:
+      - setup_user
+      - vimrc
+
+  - name: Run deployment script
+    shell: sudo -u abdulrab /home/abdulrab/deploy_emailer.sh
+    tags:
+      - setup_user
+      - deploy_emailer
+
+
+#  - name: Install pip packages
+# Once the repo has been clones
+#* Pull the emailer repository
+#  * Do this via a bash script
+#* Pip install packages

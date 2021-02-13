@@ -15,6 +15,11 @@
   file:
     state: "directory"
     path: "/{{ volume_tags['Mount']| default('apps') }}"
+    owner: abdulrab
+    group: admin
+  register: create_app
+  tags:
+    - apps
 
 - name: "create partition on {{ volume.Attachments[0].Device }}"
   parted:
