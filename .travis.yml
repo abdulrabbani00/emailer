@@ -1,8 +1,8 @@
 language: python
 os: linux
-branches:
-  only:
-  - develop
+#branches:
+#  only:
+#  - develop
 
 deploy:
   provider: lambda
