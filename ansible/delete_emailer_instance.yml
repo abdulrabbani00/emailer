@@ -1,5 +1,5 @@
 ---
-# ansible-playbook -i ec2-18-204-245-74.compute-1.amazonaws.com, delete_emailer_instance.yml
+# ansible-playbook -i emailer-dev-1.abdulrabbani.com, delete_emailer_instance.yml
 # ansible-playbook -i hostname, delete_emailer_instance.yml
 
 - name: Remove the instance if needed

@@ -7,16 +7,23 @@ data "terraform_remote_state" "emailer_volume" {
   backend = "s3"
   config = {
     bucket         = "terraform-state-emailer"
-    key            = "dev/volume/terraform.tfstate"
+    key            = "${var.environment}/volume/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "terraform-lock-emailer"
     encrypt        = true
   }
 }
 
-resource "aws_iam_instance_profile" "iam_read_profile" {
-  name  = "ec2-read-roleprofile"
-  role = "ec2-role-read"
+
+data "terraform_remote_state" "iam_profile" {
+  backend = "s3"
+  config = {
+    bucket         = "terraform-state-emailer"
+    key            = "shared/iam/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-lock-emailer"
+    encrypt        = true
+  }
 }
 
 resource "aws_volume_attachment" "emailer_persistant_attachment" {
@@ -27,24 +34,32 @@ resource "aws_volume_attachment" "emailer_persistant_attachment" {
 
 resource "aws_instance" "emailer_instance" {
   ami           = "ami-0b493722cea9f95f6" # us-west-2
-  instance_type = "t2.micro"
+  instance_type = var.instance_type
   #aiam = "ec2-read-role"
-  iam_instance_profile = aws_iam_instance_profile.iam_read_profile.name
+  iam_instance_profile = data.terraform_remote_state.iam_profile.outputs.iam_instance_profile.name
   availability_zone = "us-east-1a"
   key_name = "admin_emailer_rsa"
   vpc_security_group_ids = ["sg-00a0a79dd235057f6"]
   tags = {
-    Name = "emailer-instance-test-1"
+    Name = var.name
   }
 
   root_block_device {
-    volume_size = 30
+    volume_size = 15
   }
+}
+
+resource "aws_route53_record" "emailer_dns" {
+  zone_id = "Z0752615A629Z1FQONGD"
+  name    = "${var.name}.abdulrabbani.com"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.emailer_instance.public_ip]
 }
 
 resource "null_resource" "ansible" {
   provisioner "local-exec" {
-    command = "cd ../../../ansible/; sleep 30; ansible-playbook -i ${aws_instance.emailer_instance.public_dns}, setup_emailer_instance.yml"
+    command = "cd ../../../ansible/; sleep 90; ansible-playbook -i ${aws_route53_record.emailer_dns.name}, setup_emailer_instance.yml"
   }
 }
 

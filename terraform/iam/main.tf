@@ -3,14 +3,9 @@ provider "aws" {
   region  = "us-east-1"
 }
 
-resource "aws_ebs_volume" "emailer_persistant" {
-  availability_zone = "us-east-1a"
-  size              = 30
-
-  tags = {
-    Name = "emailer-volume-dev-1",
-    Snapshot = "true"
-  }
+resource "aws_iam_instance_profile" "iam_read_profile" {
+  name  = "ec2-read-roleprofile"
+  role = "ec2-role-read"
 }
 
 resource "aws_iam_role" "dlm_lifecycle_role" {
@@ -98,8 +93,37 @@ resource "aws_dlm_lifecycle_policy" "example" {
       Snapshot = "true"
     }
   }
+
+  lifecycle {
+    ignore_changes = [policy_details[0].schedule] 
+  }
+
 }
 
-output "emailer_persistant" {
-  value = aws_ebs_volume.emailer_persistant
+resource "aws_iam_role" "iam_for_lambda" {
+  name = "iam_for_lambda"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+output "iam_instance_profile" {
+  value = aws_iam_instance_profile.iam_read_profile
+}
+
+output "iam_for_lambda" {
+  value = aws_iam_role.iam_for_lambda
 }
