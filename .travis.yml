@@ -15,6 +15,12 @@ deploy:
 #    handler_name: "test.lambda_handler"
   zip: "terraform/lambda/dev/emailer_trigger_code/test.py.zip"
 
+before_install:
+  - echo "Before "
+
+script:
+  - echo "Hello World"
+
 #services:
 #- docker
 #before_install:
