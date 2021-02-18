@@ -7,8 +7,8 @@ branches:
 before_install:
   deploy:
     provider: lambda
-    access_key_id: ${AWS_ACCESS_KEY_ID}
-    secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+#    access_key_id: ${AWS_ACCESS_KEY_ID}
+#    secret_access_key: ${AWS_SECRET_ACCESS_KEY}
     function_name: "dev_emailer_trigger"
 #    region: "us-east-1"
 #    role: "arn:aws:iam::892324357486:role/iam_for_lambda"
