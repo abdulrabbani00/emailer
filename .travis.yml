@@ -1,12 +1,26 @@
 language: python
+os: linux
 branches:
   only:
   - develop
-services:
-- docker
+
 before_install:
-- openssl aes-256-cbc -K $encrypted_f217180e22ee_key -iv $encrypted_f217180e22ee_iv
-  -in id_rsa.enc -out id_rsa -d
-- docker build -t abdulrabbani00/emailer .
-- docker run -d abdulrabbani00/emailer /bin/sh
-- docker ps -a
+  deploy:
+    provider: lambda
+    access_key_id: ${AWS_ACCESS_KEY_ID}
+    secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+    function_name: "dev_emailer_trigger"
+    region: "us-east-1"
+    role: "arn:aws:iam::892324357486:role/iam_for_lambda"
+    runtime: "python3.7"
+    handler_name: "test.lambda_handler"
+    zip: "terraform/lambda/dev/emailer_trigger_code/test.py.zip"
+
+#services:
+#- docker
+#before_install:
+#- openssl aes-256-cbc -K $encrypted_f217180e22ee_key -iv $encrypted_f217180e22ee_iv
+#  -in id_rsa.enc -out id_rsa -d
+#- docker build -t abdulrabbani00/emailer .
+#- docker run -d abdulrabbani00/emailer /bin/sh
+#- docker ps -a
