@@ -14,7 +14,7 @@ deploy:
   provider: lambda
   function_name: "dev_emailer_trigger"
 #    region: "us-east-1"
-#    role: "arn:aws:iam::892324357486:role/iam_for_lambda"
+  role: "arn:aws:iam::892324357486:role/iam_for_lambda"
 #    runtime: "python3.7"
 #    handler_name: "test.lambda_handler"
   zip: "terraform/lambda/dev/emailer_trigger_code/test.py.zip"
