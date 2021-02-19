@@ -8,6 +8,7 @@ before_install:
 - scp  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null deploy.sh abdulrab@emailer-app-dev-1.abdulrabbani.com
 script:
 - echo "Hello World"
+- chmod 400 abdul_emailer_rsa
 - ssh  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null abdulrab@emailer-app-dev-1.abdulrabbani.com	 '~/deploy.sh'
 deploy:
   provider: lambda
