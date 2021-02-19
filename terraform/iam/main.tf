@@ -3,9 +3,52 @@ provider "aws" {
   region  = "us-east-1"
 }
 
-resource "aws_iam_instance_profile" "iam_read_profile" {
-  name  = "ec2-read-roleprofile"
-  role = "ec2-role-read"
+resource "aws_iam_instance_profile" "iam_emailer_profile" {
+  name = "ec2_emailer_profile"
+  role = aws_iam_role.emailer_role.name
+}
+
+resource "aws_iam_role" "emailer_role" {
+  name = "emailer_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "emailer_policy" {
+  name = "emailer_policy"
+  role = aws_iam_role.emailer_role.id
+
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "ec2:DescribeTags",
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "route53:ChangeResourceRecordSets",
+            "Resource": "arn:aws:route53:::hostedzone/Z0752615A629Z1FQONGD"
+        }
+    ]
+}
+EOF
 }
 
 resource "aws_iam_role" "dlm_lifecycle_role" {
@@ -95,7 +138,7 @@ resource "aws_dlm_lifecycle_policy" "example" {
   }
 
   lifecycle {
-    ignore_changes = [policy_details[0].schedule] 
+    ignore_changes = [policy_details[0].schedule]
   }
 
 }
@@ -121,7 +164,7 @@ EOF
 }
 
 output "iam_instance_profile" {
-  value = aws_iam_instance_profile.iam_read_profile
+  value = aws_iam_instance_profile.iam_emailer_profile
 }
 
 output "iam_for_lambda" {

@@ -42,6 +42,8 @@ resource "aws_instance" "emailer_instance" {
   vpc_security_group_ids = ["sg-00a0a79dd235057f6"]
   tags = {
     Name = var.name
+    AUTO_DNS_ZONE = var.zone_id
+    AUTO_DNS_NAME = "${var.name}.abdulrabbani.com"
   }
 
   root_block_device {
@@ -50,11 +52,15 @@ resource "aws_instance" "emailer_instance" {
 }
 
 resource "aws_route53_record" "emailer_dns" {
-  zone_id = "Z0752615A629Z1FQONGD"
+  zone_id = var.zone_id
   name    = "${var.name}.abdulrabbani.com"
   type    = "A"
   ttl     = "300"
   records = [aws_instance.emailer_instance.public_ip]
+  lifecycle {
+    ignore_changes = [records]
+  }
+
 }
 
 resource "null_resource" "ansible" {
