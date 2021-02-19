@@ -5,10 +5,10 @@ before_install:
   -in admin_emailer_rsa.enc -out admin_emailer_rsa -d
 - openssl aes-256-cbc -K $encrypted_040e7022ffcf_key -iv $encrypted_040e7022ffcf_iv
   -in abdul_emailer_rsa.enc -out abdul_emailer_rsa -d
-- scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r deploy.sh abdulrab@emailer-dev-1.abdulrabbani.com -i abdul_emailer_rsa
+- scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null deploy.sh abdulrab@emailer-dev-1.abdulrabbani.com -i abdul_emailer_rsa
 script:
 - echo "Hello World"
-- ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r abdulrab@emailer-dev-1.abdulrabbani.com -i abdul_emailer_rsa '~/deploy.sh'
+- ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null abdulrab@emailer-dev-1.abdulrabbani.com -i abdul_emailer_rsa '~/deploy.sh'
 deploy:
   provider: lambda
   function_name: dev_emailer_trigger
