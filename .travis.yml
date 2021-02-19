@@ -6,6 +6,7 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_040e7022ffcf_key -iv $encrypted_040e7022ffcf_iv
   -in abdul_emailer_rsa.enc -out abdul_emailer_rsa -d
 - chmod 400 abdul_emailer_rsa
+- chmod 755 deploy.sh 
 - scp  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null deploy.sh abdulrab@emailer-app-dev-1.abdulrabbani.com:/home/abdulrab/deploy.sh
 script:
 - echo "Hello World"
