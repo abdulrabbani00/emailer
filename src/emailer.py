@@ -61,11 +61,14 @@ def gmail_authenticate(file_path="token.pickle"):
     creds = None
     # the file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first time
+    logging.info(f"Looking for {file_path} locally")
     if os.path.exists(file_path):
         with open(file_path, "rb") as token:
             creds = pickle.load(token)
+            logging.info(f"Found {file_path} locally")
     else:
         try:
+            logging.info("Looking for pickle file on s3")
             creds =  get_pickle_s3("abdul-bullshit", "emailer/token.pickle")
         except:
             logging.error("No Pickle file has been found.")
@@ -79,7 +82,7 @@ def gmail_authenticate(file_path="token.pickle"):
     #    # save the credentials for the next run
     #    with open("token.pickle", "wb") as token:
     #        pickle.dump(creds, token)
-    return build('gmail', 'v1', credentials=creds, cache_discovery=False)
+    return build('gmail', 'v1', credentials=creds, cache_discovery=False)return build('gmail', 'v1', credentials=creds, cache_discovery=False)
 
 def search_messages(service, query):
     """
