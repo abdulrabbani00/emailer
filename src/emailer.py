@@ -67,11 +67,13 @@ def gmail_authenticate(file_path="token.pickle"):
             creds = pickle.load(token)
             logging.info(f"Found {file_path} locally")
     else:
-        try:
-            logging.info("Looking for pickle file on s3")
-            creds =  get_pickle_s3("abdul-bullshit", "emailer/token.pickle")
-        except:
-            logging.error("No Pickle file has been found.")
+        creds =  get_pickle_s3("abdul-bullshit", "emailer/token.pickle")
+    #else:
+    #    try:
+    #        logging.info("Looking for pickle file on s3")
+    #        creds =  get_pickle_s3("abdul-bullshit", "emailer/token.pickle")
+    #    except:
+    #        logging.error("No Pickle file has been found.")
     # Keep the bottom code as the credentials might need to eventually change
     #if not creds or not creds.valid:
     #    if creds and creds.expired and creds.refresh_token:
