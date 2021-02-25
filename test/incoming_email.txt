@@ -1,0 +1,29 @@
+[
+    {
+        "file_name": "hello_world.py",
+        "language": "python",
+        "content": """\
+#!/usr/bin/python3
+import logging
+
+logging.info("Hello Bitch")
+print("Hello, Python")
+""",
+        "execution_script": """\
+#!/bin/bash
+./hello_world.py
+"""
+    },
+    {
+        "file_name": "hello_world.sh",
+        "language": "bash",
+        "content": """\
+#!/bin/bash
+echo "Hello 'world'"
+""",
+        "execution_script": """\
+#!/bin/bash
+./hello_world.sh
+"""
+    }
+]

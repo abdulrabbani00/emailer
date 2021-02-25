@@ -19,7 +19,7 @@ deploy:
   role: arn:aws:iam::892324357486:role/iam_for_lambda
   runtime: python3.7
   handler_name: lambda_handler
-  module_name: test
-  zip: terraform/lambda/dev/emailer_trigger_code/test.py.zip
+  module_name: emailer
+  zip: terraform/lambda/dev/my-deployment-package.zip
   on:
     branch: develop

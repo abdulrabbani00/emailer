@@ -15,10 +15,10 @@ data "terraform_remote_state" "lambda_role" {
 }
 
 resource "aws_lambda_function" "lamda_trigger_emailer" {
-  filename      = "emailer_trigger_code/test.py.zip"
+  filename      = "my-deployment-package.zip"
   function_name = "${var.environment}_emailer_trigger"
   role = data.terraform_remote_state.lambda_role.outputs.iam_for_lambda.arn
-  handler       = "test.lambda_handler"
+  handler       = "emailer.lambda_handler"
 
   # The filebase64sha256() function is available in Terraform 0.11.12 and later
   # For Terraform 0.11.11 and earlier, use the base64sha256() function and the file() function:

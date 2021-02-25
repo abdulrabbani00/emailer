@@ -16,3 +16,20 @@ override.tf.json
 
 .terraformrc
 terraform.rc
+
+graveyard/
+
+# Python packages needed for lambda
+terraform/lambda/dev/emailer_trigger_code/
+
+# Testing
+test/New_Project_*
+
+# cache
+*/__pycache__/*
+
+# Jupyter
+*/.ipynb_checkpoints/*
+
+# Secret
+*/token.pickle
