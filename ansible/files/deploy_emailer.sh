@@ -15,3 +15,4 @@ then
     git pull origin $branch
 else
     git clone --branch $branch git@github.com:abdulrabbani00/emailer.git /home/abdulrab/emailer
+fi
