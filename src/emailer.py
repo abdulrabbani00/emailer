@@ -82,7 +82,7 @@ def gmail_authenticate(file_path="token.pickle"):
     #    # save the credentials for the next run
     #    with open("token.pickle", "wb") as token:
     #        pickle.dump(creds, token)
-    return build('gmail', 'v1', credentials=creds, cache_discovery=False)return build('gmail', 'v1', credentials=creds, cache_discovery=False)
+    return build('gmail', 'v1', credentials=creds, cache_discovery=False)
 
 def search_messages(service, query):
     """
@@ -319,3 +319,6 @@ def lambda_handler(event, lambda_context):
 
     if len(new_mail) > 0:
         logging.info("There is new mail")
+
+if __name__ == "__main__":
+    handle_email("is: label:unread  [Emailer]")

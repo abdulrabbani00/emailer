@@ -8,8 +8,10 @@ before_install:
 - chmod 400 abdul_emailer_rsa
 - chmod 755 deploy.sh
 - scp  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null deploy.sh abdulrab@emailer-app-dev-1.abdulrabbani.com:/home/abdulrab/deploy.sh
+
 script:
 - echo "Hello World"
+- cd test/ ; python3 -m test
 - ssh  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null abdulrab@emailer-app-dev-1.abdulrabbani.com	'chmod 755 /home/abdulrab/deploy.sh'
 - ssh  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null abdulrab@emailer-app-dev-1.abdulrabbani.com	'/home/abdulrab/deploy.sh'
 deploy:
