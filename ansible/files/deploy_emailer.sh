@@ -16,3 +16,5 @@ then
 else
     git clone --branch $branch git@github.com:abdulrabbani00/emailer.git /home/abdulrab/emailer
 fi
+
+pip3 install -r emailer/requirements.txt
