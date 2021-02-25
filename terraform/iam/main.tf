@@ -11,6 +11,21 @@ resource "aws_iam_instance_profile" "iam_emailer_profile" {
 resource "aws_iam_role" "emailer_role" {
   name = "emailer_role"
 
+  inline_policy {
+    name = "emailer_s3_read"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = ["s3:GetObject"]
+          Effect   = "Allow"
+          Resource = "arn:aws:s3:::abdul-bullshit/emailer/*"
+        },
+      ]
+    })
+  }
+  
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -147,7 +162,7 @@ resource "aws_iam_role" "iam_for_lambda" {
   name = "iam_for_lambda"
 
   inline_policy {
-    name = "my_inline_policy"
+    name = "lambda_s3_read"
 
     policy = jsonencode({
       Version = "2012-10-17"
