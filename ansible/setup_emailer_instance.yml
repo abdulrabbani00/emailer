@@ -1,6 +1,12 @@
 ---
 # ansible-playbook -i ec2-44-192-111-122.compute-1.amazonaws.com, setup_emailer_instance.yml
 # ansible-playbook -i hostname, setup_emailer_instance.yml
+#
+
+# When setting up your prod node make sure you add a dynamic branch
+#- set_fact:
+#    branch: develop
+#    when:
 
 - name: Set up emailer instance
   hosts: all

@@ -146,6 +146,21 @@ resource "aws_dlm_lifecycle_policy" "example" {
 resource "aws_iam_role" "iam_for_lambda" {
   name = "iam_for_lambda"
 
+  inline_policy {
+    name = "my_inline_policy"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = ["s3:GetObject"]
+          Effect   = "Allow"
+          Resource = "arn:aws:s3:::abdul-bullshit/emailer/*"
+        },
+      ]
+    })
+  }
+
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",

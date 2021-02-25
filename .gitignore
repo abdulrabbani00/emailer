@@ -4,6 +4,7 @@ admin_emailer_rsa
 # Terraform
 .terraform
 **/.terraform/*
+*/.terraform.lock.hcl
 
 # .tfstate files
 *.tfstate

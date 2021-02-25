@@ -2,4 +2,16 @@
 
 cd /home/abdulrab
 
-git clone --branch develop git@github.com:abdulrabbani00/emailer.git /home/abdulrab/emailer
+branch=$1
+
+if [ -z $branch ];
+then
+    branch=develop
+fi
+
+if [ -d "emailer" ]
+then
+    cd emailer
+    git pull origin $branch
+else
+    git clone --branch $branch git@github.com:abdulrabbani00/emailer.git /home/abdulrab/emailer
