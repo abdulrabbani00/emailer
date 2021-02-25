@@ -11,7 +11,7 @@ before_install:
 
 script:
 - echo "Hello World"
-- cd test/ ; python3 -m test
+- cd test/ ; python3 -m test ; cd ../
 - ssh  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null abdulrab@emailer-app-dev-1.abdulrabbani.com	'chmod 755 /home/abdulrab/deploy.sh'
 - ssh  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null abdulrab@emailer-app-dev-1.abdulrabbani.com	'/home/abdulrab/deploy.sh'
 deploy:
