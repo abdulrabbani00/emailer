@@ -6,12 +6,12 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_040e7022ffcf_key -iv $encrypted_040e7022ffcf_iv
   -in abdul_emailer_rsa.enc -out abdul_emailer_rsa -d
 - chmod 400 abdul_emailer_rsa; chmod 755 ansible/files/deploy_emailer.sh
-- cd test/ ; python3 -m test ; cd ../
 
 script:
+- cd test/ ; python3 -m test ; cd ../
 - scp -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ansible/files/deploy_emailer.sh abdulrab@emailer-app-dev-1.abdulrabbani.com:/home/abdulrab/deploy_emailer.sh
 - ssh  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null abdulrab@emailer-app-dev-1.abdulrabbani.com	'chmod 755 /home/abdulrab/deploy_emailer.sh; /home/abdulrab/deploy_emailer.sh'
-- ssh  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null abdulrab@emailer-app-dev-1.abdulrabbani.com	'chmod 755 /home/abdulrab/src/emailer.py; /home/abdulrab/src/emailer.py'
+- ssh  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null abdulrab@emailer-app-dev-1.abdulrabbani.com	'chmod 755 /home/abdulrab/emailer/src/emailer.py; /home/abdulrab/emailer/src/emailer.py'
 
 deploy:
   provider: lambda
