@@ -70,5 +70,5 @@ resource "null_resource" "ansible" {
 }
 
 output "volume_data" {
-  value = "${data.terraform_remote_state.emailer_volume.outputs.emailer_persistant.id}"
+  value = data.terraform_remote_state.emailer_volume.outputs.emailer_persistant.id
 }

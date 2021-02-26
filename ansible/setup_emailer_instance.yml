@@ -1,12 +1,9 @@
 ---
 # ansible-playbook -i ec2-44-192-111-122.compute-1.amazonaws.com, setup_emailer_instance.yml
-# ansible-playbook -i hostname, setup_emailer_instance.yml
+# ansible-playbook -i emailer-app-dev-1.abdulrabbani.com, setup_emailer_instance.yml
 #
 
 # When setting up your prod node make sure you add a dynamic branch
-#- set_fact:
-#    branch: develop
-#    when:
 
 - name: Set up emailer instance
   hosts: all
@@ -16,6 +13,14 @@
 #################################
 # Setup Server #
 #################################
+
+  - name: Get env (dev)
+    set_fact:
+      branch: develop
+      when: '"dev" in inventory_hostname'
+    tags:
+      - hostname
+
   - name: Add the user 'abdulrab' with a specific uid and a primary group of 'admin'
     user:
       name: abdulrab
@@ -72,6 +77,12 @@
       apply:
         become: yes
 
+  - name: "Change Permissions for /app"
+    file:
+      state: "directory"
+      path: "/apps"
+      owner: abdulrab
+      group: admin
 
 #################################
 #  Set up User #
@@ -131,7 +142,6 @@
       - /opt/vim_runtime
       - ~/.vim_runtime
 
-
   - name: Run the vimrc scrip
     shell: sh ~/.vim_runtime/install_awesome_parameterized.sh /opt/vim_runtime --all
     become: true
@@ -139,15 +149,47 @@
       - setup_user
       - vimrc
 
+  - name: Create the /apps/emailer/graveyard directory
+    file:
+      path: "{{item}}"
+      state: directory
+      mode: '0755'
+      owner: abdulrab
+      group: admin
+    with_items:
+      - "/apps/emailer/"
+      - "/apps/emailer/graveyard"
+    become: true
+    tags:
+      - graveyard
+
+  - name: Create the /apps/emailer/graveyard/ledger.json
+    file:
+      path: /apps/emailer/graveyard/ledger.json
+      state: touch
+      mode: '0644'
+      owner: abdulrab
+      group: admin
+    become: true
+    tags:
+      - graveyard
+
+  - name: Get the size of ledger.json file
+    stat:
+      path: /apps/emailer/graveyard/ledger.json
+    register: ledger_info
+    tags:
+      - ledger
+
+  - name: Add {} to ledger when the file is empty
+    shell: echo "{}" > /apps/emailer/graveyard/ledger.json
+    become: yes
+    when: ledger_info.stat.size == 0
+    tags:
+      - ledger
+
   - name: Run deployment script
-    shell: sudo -u abdulrab /home/abdulrab/deploy_emailer.sh
+    shell: sudo -u abdulrab /home/abdulrab/deploy_emailer.sh "{{branch}}"
     tags:
       - setup_user
       - deploy_emailer
-
-
-#  - name: Install pip packages
-# Once the repo has been clones
-#* Pull the emailer repository
-#  * Do this via a bash script
-#* Pip install packages

@@ -9,7 +9,7 @@ then
     branch=develop
 fi
 
-if [ -d "emailer" ]
+if [ -d "emailer/.git" ]
 then
     cd emailer
     git pull origin $branch

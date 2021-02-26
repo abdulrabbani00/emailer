@@ -11,21 +11,6 @@ resource "aws_iam_instance_profile" "iam_emailer_profile" {
 resource "aws_iam_role" "emailer_role" {
   name = "emailer_role"
 
-  inline_policy {
-    name = "emailer_s3_read"
-
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Action   = ["s3:GetObject"]
-          Effect   = "Allow"
-          Resource = "arn:aws:s3:::abdul-bullshit/emailer/*"
-        },
-      ]
-    })
-  }
-  
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -53,13 +38,21 @@ resource "aws_iam_role_policy" "emailer_policy" {
     "Statement": [
         {
             "Effect": "Allow",
-            "Action": "ec2:DescribeTags",
+            "Action": [
+              "ec2:DescribeTags",
+              "ec2:DescribeVolumes"
+            ],
             "Resource": "*"
         },
         {
             "Effect": "Allow",
             "Action": "route53:ChangeResourceRecordSets",
             "Resource": "arn:aws:route53:::hostedzone/Z0752615A629Z1FQONGD"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::abdul-bullshit/emailer/*"
         }
     ]
 }
