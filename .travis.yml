@@ -27,7 +27,6 @@ deploy:
 after_deploy:
 - scp -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ansible/files/deploy_emailer.sh abdulrab@emailer-app-dev-1.abdulrabbani.com:/home/abdulrab/deploy_emailer.sh
 - ssh  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null abdulrab@emailer-app-dev-1.abdulrabbani.com	'chmod 755 /home/abdulrab/deploy_emailer.sh; /home/abdulrab/deploy_emailer.sh'
-- ssh  -i abdul_emailer_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null abdulrab@emailer-app-dev-1.abdulrabbani.com	'chmod 755 /home/abdulrab/emailer/src/emailer.py; /home/abdulrab/emailer/src/emailer.py'
 
 notifications:
   email:
