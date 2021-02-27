@@ -4,16 +4,20 @@ import shutil
 import datetime
 import sys
 import os
+import shutil
 import json
 import ast
+import warnings
+
 
 sys.path.append('../src')
 import emailer
+warnings.filterwarnings(action="ignore", message="unclosed", category=ResourceWarning)
 
 # Request all access (permission to read/send/receive emails, manage the inbox, and more)
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 our_email = 'arabbani1225@gmail.com'
-UNIT_TEST_GRAVEYARD = "../test"
+UNIT_TEST_GRAVEYARD = "unittest_graveyard"
 
 class TestNotebook(unittest.TestCase):
 
@@ -21,11 +25,10 @@ class TestNotebook(unittest.TestCase):
     def setUpClass(cls):
         # Copy the empty ledger
         # Set is as the ledger
-        shutil.copy('raw_ledger.json', 'ledger.json')
-        print("Starting auth")
+        shutil.copy(f'{UNIT_TEST_GRAVEYARD}/raw_ledger.json', f'{UNIT_TEST_GRAVEYARD}/ledger.json')
+        cls.query = "[Emailer][Unit Test] File Used for unit test do not delete "
         cls.service = emailer.gmail_authenticate("../src/token.pickle")
-        cls.gmail_response = emailer.search_messages(cls.service,
-                                             "[Emailer][Unit Test] File Used for unit test do not delete ")
+        cls.gmail_response = emailer.search_messages(cls.service, cls.query)
         cls.message_details = emailer.read_msg(cls.service, cls.gmail_response[-1]['id'])
         cls.now_time = datetime.datetime.now().strftime("%Y-%m-%d-%M-%s")
         cls.project_dir = emailer.create_directory_structure(UNIT_TEST_GRAVEYARD, f"New_Project_{cls.now_time}" + ".1")
@@ -35,8 +38,14 @@ class TestNotebook(unittest.TestCase):
         """
         Tear shit down after using it
         """
-        if os.path.exists("ledger.json"):
-            os.remove("ledger.json")
+        if os.path.exists(f"{UNIT_TEST_GRAVEYARD}/ledger.json"):
+            os.remove(f"{UNIT_TEST_GRAVEYARD}/ledger.json")
+        
+        project_root = "/".join(cls.project_dir.split("/")[:-1])
+        for dirs in [project_root, f"{UNIT_TEST_GRAVEYARD}/Unit_Test"]:
+            if os.path.isdir(dirs):
+                print(f"Removing: {dirs}")
+                shutil.rmtree(dirs)
         
         cls.service.close()
 
@@ -115,6 +124,12 @@ class TestNotebook(unittest.TestCase):
         raw_file = emailer.write_email_to_file(self.message_details, self.project_dir)
 
         self.assertTrue(os.path.isfile(raw_file))
+    
+    def test_handle_email(self):
+        email_output = emailer.handle_email(self.query, UNIT_TEST_GRAVEYARD)
+        self.assertIs(type(email_output), dict)
+        self.assertEqual(email_output['Date'], "Mon, 22 Feb 2021 11:39:07 -0500")
+
 
 if __name__ == "__main__":
     unittest.main(argv=[''], verbosity=2, exit=False)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 # %%
 import os
 import pickle
@@ -7,9 +7,9 @@ import ast
 import logging
 import json
 import datetime
-import argparse
-#from importlib import reload
-#reload(logging)
+import warnings
+
+warnings.filterwarnings(action="ignore", message="unclosed", category=ResourceWarning)
 
 # Gmail API utils
 from googleapiclient.discovery import build
@@ -24,11 +24,6 @@ logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=loggin
 # Request all access (permission to read/send/receive emails, manage the inbox, and more)
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 our_email = 'arabbani1225@gmail.com'
-#GRAVEYARD_PATH = "/home/abdulrab/github/emailer/graveyard"
-
-# %% [markdown]
-# # Main Code
-# 
 
 # %%
 def get_pickle_s3(bucket_name="abdul-bullshit", 
@@ -252,7 +247,7 @@ def create_directory_structure(graveyard_path, project_version):
     project_version (str): The project name with its version
     
     Return:
-    None: Nothing is returned
+    str: The path to the project_dir that was created
     """
     project_name = project_version.split(".")[0]
     project_directory_name = graveyard_path + "/" + project_name
@@ -346,6 +341,8 @@ def parse_args(local):
     # Add the arguments
     my_parser.add_argument('--graveyard_path', default='/apps/emailer/graveyard',
                            type=str, help='The path of the graveyard')
+    my_parser.add_argument('--gmail_query', default="is: label:unread  [Emailer]",
+                           type=str, help='The query to seach emails by')
 
     if local:
         args = my_parser.parse_args(args=[])
@@ -366,21 +363,18 @@ def main(args, local):
     """
     # For Running locally
     if local:
-        handle_email("is: label:unread  [Emailer]", "/home/abdulrab/github/emailer/graveyard")
+        email_msg = handle_email("is: label:unread  [Emailer]", "/home/abdulrab/github/emailer/graveyard")
+        print(email_msg)
     else:
-        handle_email("is: label:unread  [Emailer]", args.graveyard_path)
+        handle_email(args.gmail_query, args.graveyard_path)
 
 
 # %%
 if __name__ == "__main__":
-    local = False 
+    local = True
     args = parse_args(local)
     main(args, local)
 
 # %% [markdown]
 # # Code from the Doc
 # https://www.thepythoncode.com/article/use-gmail-api-in-python#Searching_for_Emails
-
-# %%
-
-
