@@ -20,7 +20,7 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 
 # %%
-logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=logging.DEBUG, datefmt='%I:%M:%S')
+logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=logging.INFO, datefmt='%I:%M:%S')
 # Request all access (permission to read/send/receive emails, manage the inbox, and more)
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 our_email = 'arabbani1225@gmail.com'
