@@ -116,7 +116,5 @@ class TestNotebook(unittest.TestCase):
 
         self.assertTrue(os.path.isfile(raw_file))
 
-    def test_fail(self):
-        self.assertTrue(False)
-
-unittest.main(argv=[''], verbosity=2, exit=False)
+if __name__ == "__main__":
+    unittest.main(argv=[''], verbosity=2, exit=False)
