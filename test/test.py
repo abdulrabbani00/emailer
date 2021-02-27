@@ -37,6 +37,8 @@ class TestNotebook(unittest.TestCase):
         """
         if os.path.exists("ledger.json"):
             os.remove("ledger.json")
+        
+        cls.service.close()
 
     def test_gmail_auth(self):
         """
