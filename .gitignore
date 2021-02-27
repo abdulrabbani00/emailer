@@ -34,3 +34,11 @@ test/New_Project_*
 
 # Secret
 */token.pickle
+
+# Python venv
+bin/
+lib/
+lib64
+pyvenv.cfg
+
+
