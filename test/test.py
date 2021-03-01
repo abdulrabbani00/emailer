@@ -11,7 +11,7 @@ import warnings
 
 
 sys.path.append('../src')
-import emailer
+import handle_new_mail
 warnings.filterwarnings(action="ignore", message="unclosed", category=ResourceWarning)
 
 # Request all access (permission to read/send/receive emails, manage the inbox, and more)
@@ -27,11 +27,11 @@ class TestNotebook(unittest.TestCase):
         # Set is as the ledger
         shutil.copy(f'{UNIT_TEST_GRAVEYARD}/raw_ledger.json', f'{UNIT_TEST_GRAVEYARD}/ledger.json')
         cls.query = "[Emailer][Unit Test] File Used for unit test do not delete "
-        cls.service = emailer.gmail_authenticate("../src/token.pickle")
-        cls.gmail_response = emailer.search_messages(cls.service, cls.query)
-        cls.message_details = emailer.read_msg(cls.service, cls.gmail_response[-1]['id'])
+        cls.service = handle_new_mail.gmail_authenticate("../src/token.pickle")
+        cls.gmail_response = handle_new_mail.search_messages(cls.service, cls.query)
+        cls.message_details = handle_new_mail.read_msg(cls.service, cls.gmail_response[-1]['id'])
         cls.now_time = datetime.datetime.now().strftime("%Y-%m-%d-%M-%s")
-        cls.project_dir = emailer.create_directory_structure(UNIT_TEST_GRAVEYARD, f"New_Project_{cls.now_time}" + ".1")
+        cls.project_dir = handle_new_mail.create_directory_structure(UNIT_TEST_GRAVEYARD, f"New_Project_{cls.now_time}" + ".1")
 
     @classmethod
     def tearDownClass(cls):
@@ -40,13 +40,13 @@ class TestNotebook(unittest.TestCase):
         """
         if os.path.exists(f"{UNIT_TEST_GRAVEYARD}/ledger.json"):
             os.remove(f"{UNIT_TEST_GRAVEYARD}/ledger.json")
-        
+
         project_root = "/".join(cls.project_dir.split("/")[:-1])
         for dirs in [project_root, f"{UNIT_TEST_GRAVEYARD}/Unit_Test"]:
             if os.path.isdir(dirs):
                 print(f"Removing: {dirs}")
                 shutil.rmtree(dirs)
-        
+
         cls.service.close()
 
     def test_gmail_auth(self):
@@ -59,7 +59,7 @@ class TestNotebook(unittest.TestCase):
         """
         Check to make sure you can get the pickle file from s3
         """
-        creds = emailer.get_pickle_s3("abdul-bullshit", "emailer/token.pickle")
+        creds = handle_new_mail.get_pickle_s3("abdul-bullshit", "emailer/token.pickle")
         self.assertEqual(str(type(creds)), "<class 'google.oauth2.credentials.Credentials'>")
 
     def test_seach_msg(self):
@@ -89,7 +89,7 @@ class TestNotebook(unittest.TestCase):
         """
         Make sure that the subject can properly be split up
         """
-        sorted_subject = emailer.sort_subject_name("[Emailer][Hello World] Some description")
+        sorted_subject = handle_new_mail.sort_subject_name("[Emailer][Hello World] Some description")
 
         self.assertEqual(sorted_subject["project_name"], "Hello_World")
         self.assertEqual(sorted_subject['project_description'], "Some description")
@@ -105,7 +105,7 @@ class TestNotebook(unittest.TestCase):
         existing_project = f"[Emailer][Existing_Project] Some existing project {self.now_time}"
         new_project = f"[Emailer][New_Project_{self.now_time}] Some new project again"
 
-        existing_project_version = emailer.update_ledger(UNIT_TEST_GRAVEYARD, existing_project)
+        existing_project_version = handle_new_mail.update_ledger(UNIT_TEST_GRAVEYARD, existing_project)
         with open(f"{UNIT_TEST_GRAVEYARD}/ledger.json", "r") as ledger_read:
             ledger_content = json.load(ledger_read)
 
@@ -114,19 +114,19 @@ class TestNotebook(unittest.TestCase):
 
         self.assertEqual(num_of_projects, version_num)
 
-        new_project_version = emailer.update_ledger(UNIT_TEST_GRAVEYARD, new_project)
+        new_project_version = handle_new_mail.update_ledger(UNIT_TEST_GRAVEYARD, new_project)
         self.assertEqual(new_project_version, f"New_Project_{self.now_time}" + ".1")
 
     def test_create_directory_structure(self):
         self.assertTrue(os.path.isdir(self.project_dir))
 
     def test_write_email_to_file(self):
-        raw_file = emailer.write_email_to_file(self.message_details, self.project_dir)
+        raw_file = handle_new_mail.write_email_to_file(self.message_details, self.project_dir)
 
         self.assertTrue(os.path.isfile(raw_file))
-    
+
     def test_handle_email(self):
-        email_output = emailer.handle_email(self.query, UNIT_TEST_GRAVEYARD)
+        email_output = handle_new_mail.handle_email(self.query, UNIT_TEST_GRAVEYARD)
         self.assertIs(type(email_output), dict)
         self.assertEqual(email_output['Date'], "Mon, 22 Feb 2021 11:39:07 -0500")
 
