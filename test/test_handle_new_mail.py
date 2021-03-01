@@ -19,7 +19,7 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 our_email = 'arabbani1225@gmail.com'
 UNIT_TEST_GRAVEYARD = "unittest_graveyard"
 
-class TestNotebook(unittest.TestCase):
+class TestNewMail(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -55,12 +55,13 @@ class TestNotebook(unittest.TestCase):
         """
         self.assertEqual(str(type(self.service)), "<class 'googleapiclient.discovery.Resource'>")
 
-    def test_pickle_from_s3(self):
-        """
-        Check to make sure you can get the pickle file from s3
-        """
-        creds = handle_new_mail.get_pickle_s3("abdul-bullshit", "emailer/token.pickle")
-        self.assertEqual(str(type(creds)), "<class 'google.oauth2.credentials.Credentials'>")
+#    def test_pickle_from_s3(self):
+#        """
+#        Check to make sure you can get the pickle file from s3
+#        Move this to the s3 specific file
+#        """
+#        creds = handle_new_mail.get_pickle_s3("abdul-bullshit", "emailer/token.pickle")
+#        self.assertEqual(str(type(creds)), "<class 'google.oauth2.credentials.Credentials'>")
 
     def test_seach_msg(self):
         """

@@ -9,7 +9,7 @@ before_install:
 
 script:
 - cd test/
-- python3 -m unittest test
+- python3 -m unittest test_handle_new_mail
 - cd ../
 
 deploy:
