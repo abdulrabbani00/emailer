@@ -1,37 +1,46 @@
 #!/usr/bin/env python3
+"""[Test handle_new_mail.py]
+Mean to test only that one file.
+"""
 import unittest
 import shutil
 import datetime
 import sys
 import os
-import shutil
 import json
 import ast
 import warnings
 
-
 sys.path.append('../src')
-import handle_new_mail
+import handle_new_mail as hnm
 warnings.filterwarnings(action="ignore", message="unclosed", category=ResourceWarning)
 
 # Request all access (permission to read/send/receive emails, manage the inbox, and more)
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-our_email = 'arabbani1225@gmail.com'
+#our_email = 'arabbani1225@gmail.com'
 UNIT_TEST_GRAVEYARD = "unittest_graveyard"
 
 class TestNewMail(unittest.TestCase):
+    """[Unit test class]
+
+    Args:
+        unittest ([not sure]): [importing the module]
+    """
 
     @classmethod
     def setUpClass(cls):
+        """[Setting up Test]
+        """
         # Copy the empty ledger
         # Set is as the ledger
         shutil.copy(f'{UNIT_TEST_GRAVEYARD}/raw_ledger.json', f'{UNIT_TEST_GRAVEYARD}/ledger.json')
         cls.query = "[Emailer][Unit Test] File Used for unit test do not delete "
-        cls.service = handle_new_mail.gmail_authenticate("../src/token.pickle")
-        cls.gmail_response = handle_new_mail.search_messages(cls.service, cls.query)
-        cls.message_details = handle_new_mail.read_msg(cls.service, cls.gmail_response[-1]['id'])
+        cls.service = hnm.gmail_authenticate("../src/token.pickle")
+        cls.gmail_response = hnm.search_messages(cls.service, cls.query)
+        cls.message_details = hnm.read_msg(cls.service, cls.gmail_response[-1]['id'])
         cls.now_time = datetime.datetime.now().strftime("%Y-%m-%d-%M-%s")
-        cls.project_dir = handle_new_mail.create_directory_structure(UNIT_TEST_GRAVEYARD, f"New_Project_{cls.now_time}" + ".1")
+        cls.project_dir = hnm.create_directory_structure(UNIT_TEST_GRAVEYARD,
+                                                         f"New_Project_{cls.now_time}.1")
 
     @classmethod
     def tearDownClass(cls):
@@ -60,7 +69,7 @@ class TestNewMail(unittest.TestCase):
 #        Check to make sure you can get the pickle file from s3
 #        Move this to the s3 specific file
 #        """
-#        creds = handle_new_mail.get_pickle_s3("abdul-bullshit", "emailer/token.pickle")
+#        creds = hnm.get_pickle_s3("abdul-bullshit", "emailer/token.pickle")
 #        self.assertEqual(str(type(creds)), "<class 'google.oauth2.credentials.Credentials'>")
 
     def test_seach_msg(self):
@@ -90,7 +99,7 @@ class TestNewMail(unittest.TestCase):
         """
         Make sure that the subject can properly be split up
         """
-        sorted_subject = handle_new_mail.sort_subject_name("[Emailer][Hello World] Some description")
+        sorted_subject = hnm.sort_subject_name("[Emailer][Hello World] Some description")
 
         self.assertEqual(sorted_subject["project_name"], "Hello_World")
         self.assertEqual(sorted_subject['project_description'], "Some description")
@@ -106,7 +115,7 @@ class TestNewMail(unittest.TestCase):
         existing_project = f"[Emailer][Existing_Project] Some existing project {self.now_time}"
         new_project = f"[Emailer][New_Project_{self.now_time}] Some new project again"
 
-        existing_project_version = handle_new_mail.update_ledger(UNIT_TEST_GRAVEYARD, existing_project)
+        existing_project_version = hnm.update_ledger(UNIT_TEST_GRAVEYARD, existing_project)
         with open(f"{UNIT_TEST_GRAVEYARD}/ledger.json", "r") as ledger_read:
             ledger_content = json.load(ledger_read)
 
@@ -115,19 +124,25 @@ class TestNewMail(unittest.TestCase):
 
         self.assertEqual(num_of_projects, version_num)
 
-        new_project_version = handle_new_mail.update_ledger(UNIT_TEST_GRAVEYARD, new_project)
+        new_project_version = hnm.update_ledger(UNIT_TEST_GRAVEYARD, new_project)
         self.assertEqual(new_project_version, f"New_Project_{self.now_time}" + ".1")
 
     def test_create_directory_structure(self):
+        """[Check to see that the function create the directory]
+        """
         self.assertTrue(os.path.isdir(self.project_dir))
 
     def test_write_email_to_file(self):
-        raw_file = handle_new_mail.write_email_to_file(self.message_details, self.project_dir)
+        """[Make sure that the function can write a json file]
+        """
+        raw_file = hnm.write_email_to_file(self.message_details, self.project_dir)
 
         self.assertTrue(os.path.isfile(raw_file))
 
     def test_handle_email(self):
-        email_output = handle_new_mail.handle_email(self.query, UNIT_TEST_GRAVEYARD)
+        """[Test the entire function with all components]
+        """
+        email_output = hnm.handle_email(self.query, UNIT_TEST_GRAVEYARD)
         self.assertIs(type(email_output), dict)
         self.assertEqual(email_output['Date'], "Mon, 22 Feb 2021 11:39:07 -0500")
 

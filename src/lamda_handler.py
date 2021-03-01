@@ -11,10 +11,10 @@ def lambda_handler():
     - If there are any errors:
         - It will capture the errors (This will be written later)
         - It will send an email output with them (This will be written later)
-    """ 
+    """
     service = gmail_authenticate()
     new_mail = search_messages(service, "is: label:unread  [Emailer] ")
-    
+
     if len(new_mail) > 0:
         logging.info("There is new mail")
 
