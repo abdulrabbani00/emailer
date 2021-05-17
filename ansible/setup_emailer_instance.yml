@@ -1,0 +1,195 @@
+---
+# ansible-playbook -i ec2-44-192-111-122.compute-1.amazonaws.com, setup_emailer_instance.yml
+# ansible-playbook -i emailer-app-dev-1.abdulrabbani.com, setup_emailer_instance.yml
+#
+
+# When setting up your prod node make sure you add a dynamic branch
+
+- name: Set up emailer instance
+  hosts: all
+
+  tasks:
+
+#################################
+# Setup Server #
+#################################
+
+  - name: Get env (dev)
+    set_fact:
+      branch: develop
+      when: '"dev" in inventory_hostname'
+    tags:
+      - hostname
+
+  - name: Add the user 'abdulrab' with a specific uid and a primary group of 'admin'
+    user:
+      name: abdulrab
+      uid: 1040
+      groups: admin, sudo
+      shell: /bin/bash
+    become: yes
+    tags:
+      - setup_user
+
+  - name: Install critical packages
+    apt:
+      name: ['xfsprogs', 'parted', 'git', 'python3-pip']
+      state: present
+    become: true
+    tags:
+      - setup_user
+
+  - name: Copy dns update script
+    copy:
+      src: files/update_dns.sh
+      dest: /var/lib/cloud/scripts/per-boot/
+      owner: root
+      group: root
+      mode: 0755
+    become: yes
+    tags:
+      - update_dns
+
+  - name: "get facts"
+    ec2_metadata_facts: {}
+
+#################################
+# Mount EBS volume #
+#################################
+
+  - name: determine the supervisor
+    set_fact:
+      supervisor: "{{ (ansible_ec2_instance_type.startswith('t3') or ansible_ec2_instance_type.startswith('c5') or ansible_ec2_instance_type.startswith('m5') or ansible_ec2_instance_type.startswith('r5')) | ternary('nitro','legacy') }}"
+
+  - name: get list of attached volumes
+    shell: INSTANCE=$(curl -q http://169.254.169.254/latest/meta-data/instance-id); REGION=$(curl -q http://169.254.169.254/latest/meta-data/placement/availability-zone); aws ec2 describe-volumes --region ${REGION%?} --filters "Name=attachment.instance-id,Values=$INSTANCE"
+    register: volumes_raw
+    changed_when: false
+
+  - name: loop through the attached volumes
+    include_tasks: "tasks/volume.yml"
+    loop: "{{ (volumes_raw.stdout | from_json).Volumes }}"
+    loop_control:
+      loop_var: "volume"
+      label: "{{ volume.Attachments[0].Device }}"
+    when: volume.Attachments[0].Device != "/dev/xvda"
+    args:
+      apply:
+        become: yes
+
+  - name: "Change Permissions for /app"
+    file:
+      state: "directory"
+      path: "/apps"
+      owner: abdulrab
+      group: admin
+
+#################################
+#  Set up User #
+#################################
+
+  - name: Debug dict
+    debug:
+      msg: "{{item['src']}}"
+    with_items:
+      - {"src": "/some/source", "dest": "some_dest", "perm": "some_perm"}
+    tags:
+      - test
+
+  - name: Create .ssh and emailer folder
+    file:
+      path: "/home/abdulrab/{{item}}"
+      state: directory
+      mode: 0755
+      owner: abdulrab
+      group: abdulrab
+    with_items:
+      - .ssh
+      - emailer
+    become: yes
+    tags:
+      - setup_user
+
+  - name: Copy Needed files
+    copy:
+      src: "{{item.src}}"
+      dest: "{{item.dest}}"
+      owner: abdulrab
+      group: abdulrab
+      mode: "{{item.mode}}"
+    become: yes
+    with_items:
+      - {"src": "files/bashrc", "dest": "/home/abdulrab/.bashrc","mode": "644"}
+      - {"src": "files/config", "dest": "/home/abdulrab/.ssh/config","mode": "644"}
+      - {"src": "files/abdul_emailer_rsa.pub", "dest": "/home/abdulrab/.ssh/id_rsa.pub","mode": "400"}
+      - {"src": "files/abdul_emailer_rsa.pub", "dest": "/home/abdulrab/.ssh/authorized_keys","mode": "400"}
+      - {"src": "files/abdul_emailer_rsa", "dest": "/home/abdulrab/.ssh/id_rsa","mode": "400"}
+      - {"src": "files/deploy_emailer.sh", "dest": "/home/abdulrab/deploy_emailer.sh","mode": "766"}
+    tags:
+      - setup_user
+
+  - name: Copy over .vimrc
+    git:
+      repo: "https://github.com/amix/vimrc.git"
+      dest: "{{item}}"
+      clone: yes
+      depth: 1
+    become: true
+    tags:
+      - setup_user
+      - vimrc
+    with_items:
+      - /opt/vim_runtime
+      - ~/.vim_runtime
+
+  - name: Run the vimrc scrip
+    shell: sh ~/.vim_runtime/install_awesome_parameterized.sh /opt/vim_runtime --all
+    become: true
+    tags:
+      - setup_user
+      - vimrc
+
+  - name: Create the /apps/emailer/graveyard directory
+    file:
+      path: "{{item}}"
+      state: directory
+      mode: '0755'
+      owner: abdulrab
+      group: admin
+    with_items:
+      - "/apps/emailer/"
+      - "/apps/emailer/graveyard"
+    become: true
+    tags:
+      - graveyard
+
+  - name: Create the /apps/emailer/graveyard/ledger.json
+    file:
+      path: /apps/emailer/graveyard/ledger.json
+      state: touch
+      mode: '0644'
+      owner: abdulrab
+      group: admin
+    become: true
+    tags:
+      - graveyard
+
+  - name: Get the size of ledger.json file
+    stat:
+      path: /apps/emailer/graveyard/ledger.json
+    register: ledger_info
+    tags:
+      - ledger
+
+  - name: Add {} to ledger when the file is empty
+    shell: echo "{}" > /apps/emailer/graveyard/ledger.json
+    become: yes
+    when: ledger_info.stat.size == 0
+    tags:
+      - ledger
+
+  - name: Run deployment script
+    shell: sudo -u abdulrab /home/abdulrab/deploy_emailer.sh "{{branch}}"
+    tags:
+      - setup_user
+      - deploy_emailer

@@ -1,0 +1,44 @@
+abdul_emailer_rsa
+admin_emailer_rsa
+
+# Terraform
+.terraform
+**/.terraform/*
+*.terraform.lock.hcl
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+.terraformrc
+terraform.rc
+
+graveyard/
+
+# Python packages needed for lambda
+terraform/lambda/dev/emailer_trigger_code/
+
+# Testing
+test/New_Project_*
+
+# cache
+*/__pycache__/*
+
+# Jupyter
+*/.ipynb_checkpoints/*
+
+# Secret
+*/token.pickle
+
+# Python venv
+bin/
+lib/
+lib64
+pyvenv.cfg
+
+.vscode/

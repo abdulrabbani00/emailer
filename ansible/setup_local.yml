@@ -1,0 +1,33 @@
+---
+
+- name: Set up Local ansible
+  hosts: localhost
+
+  tasks:
+
+  - name: See who owns the ~/.ssh folder
+    shell: 'stat -c "%U" ~/.ssh/'
+    register: local_user
+
+  - name: See who owns the ~/.ssh folder
+    shell: 'stat -c "%G" ~/.ssh/'
+    register: local_group
+
+  - debug:
+      msg: "{{vault_password_file}}"
+
+  - name: Copy emailer ssh key to ~/.ssh
+    copy:
+      src: files/abdul_emailer_rsa
+      dest: ~/.ssh/abdul_emailer_rsa
+      owner: "{{local_user.stdout}}"
+      group: "{{local_group.stdout}}"
+      mode: 0400
+
+  - name: Copy admin_emailer ssh key to ~/.ssh
+    copy:
+      src: files/admin_emailer_rsa
+      dest: ~/.ssh/admin_emailer_rsa
+      owner: "{{local_user.stdout}}"
+      group: "{{local_group.stdout}}"
+      mode: 0400
