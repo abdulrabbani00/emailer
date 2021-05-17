@@ -1,4 +1,4 @@
-# Emailer
+# Emailer [DEPRECATED]
 
 This project will allow users to send a formatted email to a specified Gmail account, which contains a body of code.
 This application will then parse the email, extract the code, run the code, and respond with an ouput.
